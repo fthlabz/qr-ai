@@ -4,68 +4,44 @@ from flask_cors import CORS
 import replicate
 
 app = Flask(__name__)
-
-# Tüm kaynaklardan gelen isteklere izin ver (CORS)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app)
 
 @app.route('/')
 def home():
-    return "MOTOR ÇALIŞIYOR! (V3.0 - OTOMATİK GÜZELLEŞTİRME AKTİF) 🚀"
+    return "MOTOR CALISIYOR! (V4.0 Final) 🚀"
 
 @app.route('/generate-qr', methods=['POST'])
 def generate_qr():
-    print("🔔 SİPARİŞ GELDİ! Motor çalışıyor...")
-    
-    # API Token Kontrolü
     api_token = os.environ.get("REPLICATE_API_TOKEN")
     if not api_token:
-        print("❌ HATA: API Token yok!")
-        return jsonify({"error": "Sunucu ayarlarında API Token eksik!"}), 500
-
-    # Gelen Veriyi Al
-    data = request.json
-    if not data:
-        data = {}
-
-    # 1. KULLANICININ İSTEĞİ (Örn: "Batman")
-    user_prompt = data.get('prompt', 'cyborg')
-    url = data.get('url', 'https://google.com')
-    strength = float(data.get('strength', 1.45))
-
-    # 2. SİHİRLİ SOS (Otomatik Güzelleştirici) ✨
-    # Sen ne yazarsan yaz, arkasına bu kelimeleri ekleyip kaliteyi tavan yaptırıyoruz.
-    magic_suffix = ", masterpiece, best quality, highres, 8k, ultra detailed, vibrant, sharp focus, highly detailed, cinematic lighting, distinct image"
-    
-    # Son Prompt: "Batman" + "Magic Suffix"
-    final_prompt = user_prompt + magic_suffix
-    
-    # 3. KORUMA KALKANI (Negatif Promptlar) 🛡️
-    # Bunları asla resme sokma diyoruz.
-    neg_prompt = "text, watermark, blur, low quality, ugly, deformed, bad anatomy, disfigured, grainy, broken QR code, distorted, noise, blurry, low resolution"
-
-    print(f"🎨 Çizilen Şey: {final_prompt}")
+        return jsonify({"error": "API Token eksik"}), 500
 
     try:
-        # Replicate Motoruna Gönder
+        data = request.json or {}
+        user_prompt = data.get('prompt', 'teddy bear')
+        url = data.get('url', 'https://google.com')
+        strength = float(data.get('strength', 1.45))
+
+        # Kalite artirici kelimeler
+        final_prompt = user_prompt + ", masterpiece, best quality, 8k, ultra detailed, cinematic lighting, vibrant"
+        
+        # Yasakli kelimeler
+        neg_prompt = "text, watermark, blur, low quality, ugly, deformed, broken QR code"
+
         output = replicate.run(
             "zylim0702/qr_code_controlnet:628e604e13cf63d8ec58bd4d238474e8986b054bc5e1326e50995fdbc851c557",
             input={
                 "url": url,
-                "prompt": final_prompt,      # Senin yazdığın + Sihirli Kelimeler
-                "negative_prompt": neg_prompt, # Yasaklı kelimeler
+                "prompt": final_prompt,
+                "negative_prompt": neg_prompt,
                 "qr_conditioning_scale": strength,
                 "num_inference_steps": 40,
-                "guidance_scale": 9.0          # Yapay zekanın hayal gücünü biraz daha özgür bıraktık
+                "guidance_scale": 9.0
             }
         )
-        
-        # Sonucu Döndür
-        resim_linki = str(output[0])
-        print("✅ BAŞARILI: Resim üretildi.")
-        return jsonify({"image_url": resim_linki})
+        return jsonify({"image_url": str(output[0])})
 
     except Exception as e:
-        print("❌ HATA OLUŞTU:", str(e))
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
