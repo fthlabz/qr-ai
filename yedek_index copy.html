@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI QR MASTER - 42x32 Baskı</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #050505;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .panel {
+            background: #151515;
+            padding: 30px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid #333;
+            box-shadow: 0 0 50px rgba(0, 255, 200, 0.1);
+        }
+
+        h2 { text-align: center; color: #00ffcc; margin-top: 0; letter-spacing: 1px;}
+        
+        label { display: block; margin-top: 15px; color: #888; font-size: 0.9rem; font-weight: bold;}
+        
+        input, textarea, select {
+            width: 100%; padding: 15px; background: #222; border: 1px solid #333;
+            color: #fff; border-radius: 10px; margin-top: 5px; font-size: 16px; box-sizing: border-box;
+        }
+        
+        input:focus, textarea:focus { border-color: #00ffcc; outline: none; }
+
+        .slider-container { display: flex; align-items: center; gap: 10px; }
+        input[type="range"] { accent-color: #00ffcc; }
+
+        button {
+            width: 100%; padding: 20px; margin-top: 25px; border: none; border-radius: 12px;
+            font-size: 18px; font-weight: bold; text-transform: uppercase; cursor: pointer; 
+            background: linear-gradient(90deg, #00ffcc, #0099ff); color: #000; transition: 0.3s;
+        }
+        button:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,255,204,0.4); }
+
+        #resultArea {
+            margin-top: 30px; display: none; text-align: center;
+            background: #fff; padding: 10px; border-radius: 4px;
+        }
+        
+        /* Canvas Paspartu Ayarı İçin */
+        canvas { 
+            max-width: 100%; height: auto; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+        }
+        
+        .loading { font-size: 0.9rem; color: #00ffcc; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="panel">
+        <h2>AI QR DARPHANE</h2>
+        <div style="text-align:center; font-size:0.8rem; color:#666;">
+            Stable Diffusion & ControlNet Teknolojisi<br>
+            42x32 Sayfa / 40x30 Baskı
+        </div>
+
+        <label>🔗 Gidilecek Link:</label>
+        <input type="text" id="urlInput" value="https://instagram.com/sizin_hesap" placeholder="https://...">
+
+        <label>🎨 Ne Çizelim? (Prompt):</label>
+        <textarea id="promptInput" rows="3" placeholder="Örn: A delicious hamburger with melting cheese, cinematic lighting, hyper realistic 8k"></textarea>
+        <div style="font-size:0.75rem; color:#555;">* İngilizce yazarsan daha iyi sonuç alırsın.</div>
+
+        <label>🎚️ QR Okunabilirlik Gücü:</label>
+        <div class="slider-container">
+            <input type="range" id="scaleInput" min="0.8" max="2.0" step="0.1" value="1.1" oninput="document.getElementById('scaleVal').innerText = this.value">
+            <span id="scaleVal" style="width: 30px; text-align:center;">1.1</span>
+        </div>
+        <div style="font-size:0.75rem; color:#555;">Düşük = Daha Sanatsal / Yüksek = Daha Kolay Okunur</div>
+
+        <button onclick="generateAIQR()">🚀 YAPAY ZEKAYI ÇALIŞTIR</button>
+        <div id="loadingText" class="loading">⏳ Yapay zeka boyuyor... (Yaklaşık 10-20 sn)</div>
+
+        <div id="resultArea">
+            <canvas id="printCanvas"></canvas>
+            <button onclick="downloadCanvas()" style="margin-top:10px; background:#ff0055; color:white;">💾 42x32cm BASKIYI İNDİR</button>
+        </div>
+    </div>
+
+    <script>
+        // --- SENİN PASPARTU AYARLARIN ---
+        // 300 DPI için piksel hesapları
+        const DPI = 118.11;
+        const PAGE_W = Math.round(42 * DPI); // 4961 px
+        const PAGE_H = Math.round(32 * DPI); // 3780 px
+        const PRINT_W = Math.round(40 * DPI);
+        const PRINT_H = Math.round(30 * DPI);
+        
+        // Kenar boşlukları
+        const MARGIN_X = (PAGE_W - PRINT_W) / 2;
+        const MARGIN_Y = (PAGE_H - PRINT_H) / 2;
+
+        async function generateAIQR() {
+            const url = document.getElementById("urlInput").value;
+            const prompt = document.getElementById("promptInput").value;
+            const scale = document.getElementById("scaleInput").value;
+
+            if(!prompt) return alert("Ne çizeceğimi yazmadın!");
+
+            document.getElementById("loadingText").style.display = "block";
+            
+            // BURAYI KENDİ RENDER URL'İN İLE DEĞİŞTİRECEKSİN!
+            // Örn: https://senin-app-ismin.onrender.com/generate-qr
+            const API_URL = "http://127.0.0.1:5000/generate-qr"; 
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url, prompt, scale })
+                });
+
+                const data = await response.json();
+                
+                if(data.image_url) {
+                    placeImageOnCanvas(data.image_url);
+                } else {
+                    alert("Hata oluştu: " + (data.error || "Bilinmeyen hata"));
+                }
+
+            } catch (error) {
+                alert("Sunucuya bağlanamadı. Python kodunu çalıştırdın mı?");
+                console.error(error);
+            } finally {
+                document.getElementById("loadingText").style.display = "none";
+            }
+        }
+
+        function placeImageOnCanvas(imgUrl) {
+            const canvas = document.getElementById("printCanvas");
+            const ctx = canvas.getContext("2d");
+            
+            // Canvası tam boyut ayarla (42x32cm)
+            canvas.width = PAGE_W;
+            canvas.height = PAGE_H;
+
+            // 1. ZEMİN BEYAZ
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, PAGE_W, PAGE_H);
+
+            // 2. AI RESMİNİ YÜKLE VE YERLEŞTİR
+            const img = new Image();
+            img.crossOrigin = "Anonymous"; // CORS hatası almamak için
+            img.onload = function() {
+                // Yapay zeka kare (1024x1024) veya dikey veriyor genelde.
+                // Biz bunu 40x30 alanına (PRINT_W x PRINT_H) oturtacağız.
+                
+                // Resmi esneterek tam oturtmak mı istersin yoksa keserek mi?
+                // Genelde tam oturtmak (stretch) QR'ı bozabilir ama ControlNet sağlamdır.
+                // Biz 'Cover' mantığı ile ortalayalım.
+                
+                ctx.drawImage(img, MARGIN_X, MARGIN_Y, PRINT_W, PRINT_H);
+                
+                document.getElementById("resultArea").style.display = "block";
+            };
+            img.src = imgUrl;
+        }
+
+        function downloadCanvas() {
+            const canvas = document.getElementById("printCanvas");
+            const link = document.createElement('a');
+            link.download = `AI_QR_42x32_${Date.now()}.jpg`;
+            link.href = canvas.toDataURL("image/jpeg", 0.95);
+            link.click();
+        }
+    </script>
+</body>
+</html>
