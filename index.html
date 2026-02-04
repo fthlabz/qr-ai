@@ -1,231 +1,156 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI QR Darphane – Print Master</title>
+    <meta charset="UTF-8" />
+    <title>QR AI Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <style>
         body {
-            background-color: #050505;
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #0e0e0e;
+            color: #fff;
             margin: 0;
             padding: 20px;
         }
+
         .container {
-            background-color: #111;
-            padding: 2rem;
-            border-radius: 18px;
-            box-shadow: 0 0 50px rgba(0, 255, 157, 0.12);
-            max-width: 420px;
-            width: 100%;
-            border: 1px solid #333;
+            max-width: 900px;
+            margin: auto;
         }
+
         h1 {
             text-align: center;
-            color: #00ff9d;
-            margin-bottom: 1rem;
-            font-size: 1.6rem;
-            letter-spacing: 2px;
+            margin-bottom: 20px;
         }
-        .input-group {
-            margin-bottom: 1.2rem;
-        }
+
         label {
             display: block;
-            margin-bottom: 6px;
-            font-size: 0.8rem;
-            color: #aaa;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: bold;
         }
-        input[type="text"], input[type="url"], textarea {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid #333;
-            background-color: #1a1a1a;
-            color: #fff;
-            outline: none;
-            resize: vertical;
-        }
+
         textarea {
-            min-height: 70px;
-        }
-        input:focus, textarea:focus {
-            border-color: #00ff9d;
-            box-shadow: 0 0 10px rgba(0,255,157,0.25);
-        }
-        .slider-container {
-            margin-bottom: 1.2rem;
-        }
-        input[type="range"] {
             width: 100%;
-            accent-color: #00ff9d;
+            min-height: 80px;
+            padding: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
         }
-        .range-label {
-            font-size: 0.75rem;
-            color: #777;
-            display: flex;
-            justify-content: space-between;
-        }
+
         button {
-            width: 100%;
-            padding: 14px;
-            border-radius: 30px;
-            border: none;
-            font-weight: 900;
-            font-size: 0.9rem;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .generate-btn {
-            background: linear-gradient(45deg, #00ff9d, #00b8ff);
-            color: #000;
-        }
-        .download-btn {
-            background: #fff;
-            color: #000;
-            display: none;
-        }
-        #result-area {
             margin-top: 20px;
-            min-height: 280px;
-            border: 1px dashed #333;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #0a0a0a;
-            overflow: hidden;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
         }
-        img {
+
+        #result-area {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        #result-area img {
             max-width: 100%;
+            border: none;
         }
+
         .loading {
-            color: #00ff9d;
+            font-size: 18px;
+            opacity: 0.8;
+        }
+
+        .actions {
+            margin-top: 15px;
         }
     </style>
 </head>
 
 <body>
-
 <div class="container">
-    <h1>AI QR DARPHANE</h1>
 
-    <!-- PROMPT -->
-    <div class="input-group">
-        <label>Prompt</label>
-        <textarea id="promptInput"></textarea>
+    <h1>QR AI Görsel Üretici</h1>
+
+    <label for="prompt">Prompt</label>
+    <textarea id="prompt" placeholder=""></textarea>
+
+    <label for="negative">Negative Prompt</label>
+    <textarea id="negative" placeholder=""></textarea>
+
+    <button onclick="generateImage()">Görsel Üret</button>
+
+    <div id="result-area"></div>
+
+    <div class="actions" style="text-align:center;">
+        <button onclick="downloadPrintReady()">30×40 – 300 DPI İndir</button>
     </div>
 
-    <!-- NEGATIVE PROMPT -->
-    <div class="input-group">
-        <label>Negative Prompt</label>
-        <textarea id="negativeInput"></textarea>
-    </div>
-
-    <!-- URL -->
-    <div class="input-group">
-        <label>QR Link</label>
-        <input type="url" id="urlInput"
-               value="https://qr-mini-web.onrender.com/?id=1001">
-    </div>
-
-    <!-- STRENGTH -->
-    <div class="slider-container">
-        <label style="font-size:0.8rem;color:#aaa;">
-            QR Okunabilirlik: <span id="strengthValue">1.45</span>
-        </label>
-        <input type="range" id="controlStrength"
-               min="0.8" max="2.0" step="0.05" value="1.45">
-        <div class="range-label">
-            <span>Sanatsal</span>
-            <span>Net</span>
-        </div>
-    </div>
-
-    <button class="generate-btn" id="genBtn" onclick="generateQR()">
-        🚀 YAPAY ZEKAYI ÇALIŞTIR
-    </button>
-
-    <button class="download-btn" id="dlBtn" onclick="downloadPrintReady()">
-        📥 30×40 CM – 300 DPI İNDİR
-    </button>
-
-    <div id="result-area">
-        <span style="color:#444;">QR görseli burada oluşur</span>
-    </div>
 </div>
 
 <script>
-const API_URL = "https://qr-ai.onrender.com/generate-qr";
-let currentImageUrl = "";
+    let currentImageUrl = null;
 
-controlStrength.addEventListener("input", e => {
-    strengthValue.textContent = e.target.value;
-});
+    async function generateImage() {
+        const prompt = document.getElementById("prompt").value;
+        const negative = document.getElementById("negative").value;
 
-async function generateQR() {
-    const url = urlInput.value;
-    const prompt = promptInput.value;
-    const negative = negativeInput.value;
-    const strength = parseFloat(controlStrength.value);
-
-    genBtn.disabled = true;
-    result-area.innerHTML = '<div class="loading">Üretiliyor…</div>';
-    dlBtn.style.display = "none";
-
-    try {
-        const res = await fetch(API_URL, {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ url, prompt, negative, strength })
-        });
-
-        const data = await res.json();
-        if (!data.image_url) throw new Error("Görsel üretilemedi");
-
-        currentImageUrl = data.image_url;
         document.getElementById("result-area").innerHTML =
-            `<img src="${data.image_url}">`;
-        dlBtn.style.display = "block";
+            '<div class="loading">Üretiliyor…</div>';
 
-    } catch (e) {
-        document.getElementById("result-area").innerHTML =
-            `<div style="color:#ff5555">${e.message}</div>`;
-    } finally {
-        genBtn.disabled = false;
+        try {
+            const response = await fetch("/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    prompt: prompt,
+                    negative_prompt: negative
+                })
+            });
+
+            const data = await response.json();
+
+            // ⛔ Eğer backend farklı isim döndürüyorsa SADECE BURASI değişir
+            currentImageUrl = data.image_url;
+
+            if (!currentImageUrl) {
+                throw new Error("Görsel URL alınamadı");
+            }
+
+            document.getElementById("result-area").innerHTML =
+                `<img src="${currentImageUrl}" alt="QR Result" />`;
+
+        } catch (err) {
+            document.getElementById("result-area").innerHTML =
+                "<div class='loading'>Hata oluştu</div>";
+            console.error(err);
+        }
     }
-}
 
-async function downloadPrintReady() {
-    if (!currentImageUrl) return;
+    async function downloadPrintReady() {
+        if (!currentImageUrl) return;
 
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = currentImageUrl;
-    await new Promise(r => img.onload = r);
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = currentImageUrl;
+        await new Promise(resolve => img.onload = resolve);
 
-    // 30x40 cm @ 300 DPI
-    const width = 3543;
-    const height = 4724;
+        // 30x40 cm @ 300 DPI
+        const width = 3543;
+        const height = 4724;
 
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
 
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(img, 0, 0, width, height);
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
 
-    const a = document.createElement("a");
-    a.download = `QR-30x40-300DPI-${Date.now()}.jpg`;
-    a.href = canvas.toDataURL("image/jpeg", 0.95);
-    a.click();
-}
+        const a = document.createElement("a");
+        a.download = `QR-30x40-300DPI-${Date.now()}.jpg`;
+        a.href = canvas.toDataURL("image/jpeg", 0.95);
+        a.click();
+    }
 </script>
 
 </body>
