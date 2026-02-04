@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI QR Darphane - Baskı Modu</title>
+    <title>AI QR Darphane – Print Master</title>
+
     <style>
         body {
             background-color: #050505;
             color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
@@ -20,308 +20,212 @@
         .container {
             background-color: #111;
             padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 0 50px rgba(0, 255, 157, 0.1);
-            max-width: 400px;
+            border-radius: 18px;
+            box-shadow: 0 0 50px rgba(0, 255, 157, 0.12);
+            max-width: 420px;
             width: 100%;
-            text-align: center;
             border: 1px solid #333;
         }
         h1 {
+            text-align: center;
             color: #00ff9d;
-            margin-bottom: 0.5rem;
-            font-size: 1.8rem;
-            text-transform: uppercase;
+            margin-bottom: 1rem;
+            font-size: 1.6rem;
             letter-spacing: 2px;
         }
-        .subtitle {
-            color: #888;
-            font-size: 0.8rem;
-            margin-bottom: 1.5rem;
-        }
-        .info-badge {
-            background-color: #222;
-            color: #aaa;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.75rem;
-            margin-bottom: 20px;
-            display: inline-block;
-            border: 1px solid #333;
-        }
         .input-group {
-            margin-bottom: 1.5rem;
-            text-align: left;
+            margin-bottom: 1.2rem;
         }
         label {
             display: block;
-            margin-bottom: 0.5rem;
-            color: #ccc;
-            font-size: 0.9rem;
-            font-weight: bold;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
+            color: #aaa;
         }
-        input[type="text"], input[type="url"] {
+        input[type="text"], input[type="url"], textarea {
             width: 100%;
             padding: 12px;
             border-radius: 10px;
             border: 1px solid #333;
             background-color: #1a1a1a;
             color: #fff;
-            box-sizing: border-box;
             outline: none;
-            transition: all 0.3s;
+            resize: vertical;
         }
-        input:focus {
+        textarea {
+            min-height: 70px;
+        }
+        input:focus, textarea:focus {
             border-color: #00ff9d;
-            box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
+            box-shadow: 0 0 10px rgba(0,255,157,0.25);
         }
         .slider-container {
-            margin-bottom: 1.5rem;
-            text-align: left;
+            margin-bottom: 1.2rem;
         }
         input[type="range"] {
             width: 100%;
             accent-color: #00ff9d;
         }
-        .range-labels {
+        .range-label {
+            font-size: 0.75rem;
+            color: #777;
             display: flex;
             justify-content: space-between;
-            color: #666;
-            font-size: 0.7rem;
-            margin-top: 5px;
-        }
-        /* BUTONLAR */
-        .btn-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
         }
         button {
-            border: none;
-            padding: 15px 30px;
-            border-radius: 30px;
-            font-weight: 900;
-            font-size: 1rem;
-            cursor: pointer;
             width: 100%;
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-transform: uppercase;
+            padding: 14px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 900;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-top: 10px;
         }
         .generate-btn {
             background: linear-gradient(45deg, #00ff9d, #00b8ff);
             color: #000;
         }
-        .generate-btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(0, 255, 157, 0.4);
-        }
-        /* İNDİRME BUTONU (Başlangıçta Gizli) */
         .download-btn {
             background: #fff;
             color: #000;
-            border: 2px solid #000;
-            display: none; /* Başlangıçta gizli */
-            font-weight: bold;
-        }
-        .download-btn:hover {
-            background: #ddd;
-        }
-
-        button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            filter: grayscale(100%);
+            display: none;
         }
         #result-area {
             margin-top: 20px;
-            min-height: 300px;
+            min-height: 280px;
+            border: 1px dashed #333;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 15px;
-            background-color: #0a0a0a;
-            border: 1px dashed #333;
+            background: #0a0a0a;
             overflow: hidden;
-            position: relative;
         }
         img {
             max-width: 100%;
-            border-radius: 10px;
         }
         .loading {
             color: #00ff9d;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
         }
     </style>
 </head>
+
 <body>
 
 <div class="container">
     <h1>AI QR DARPHANE</h1>
-    <div class="subtitle">Baskı Modu: 42x32 Sayfa / 40x30 Desen</div>
-    <div class="info-badge">Özel Ebatlama Sistemi Aktif</div>
 
+    <!-- PROMPT -->
     <div class="input-group">
-        <label>🔗 Gidilecek Link:</label>
-        <input type="url" id="urlInput" value="https://qr-mini-web.onrender.com/?id=1001" placeholder="https://...">
+        <label>Prompt</label>
+        <textarea id="promptInput"></textarea>
     </div>
 
+    <!-- NEGATIVE PROMPT -->
     <div class="input-group">
-        <label>🎨 Ne Çizelim? (Prompt):</label>
-        <input type="text" id="promptInput" placeholder="Örn: Red samurai helmet..." value="Qr code">
-        <div style="font-size: 0.7rem; color: #555; margin-top: 5px;">* İngilizce yazarsan daha iyi sonuç alırsın.</div>
+        <label>Negative Prompt</label>
+        <textarea id="negativeInput"></textarea>
     </div>
 
+    <!-- URL -->
+    <div class="input-group">
+        <label>QR Link</label>
+        <input type="url" id="urlInput"
+               value="https://qr-mini-web.onrender.com/?id=1001">
+    </div>
+
+    <!-- STRENGTH -->
     <div class="slider-container">
-        <label>🎚️ QR Okunabilirlik Gücü: <span id="strengthValue" style="color:#00ff9d">1.45</span></label>
-        <input type="range" id="controlStrength" min="0.8" max="2.0" step="0.05" value="1.45">
-        <div class="range-labels">
-            <span>Daha Sanatsal</span>
-            <span>Daha Kolay Okunur</span>
+        <label style="font-size:0.8rem;color:#aaa;">
+            QR Okunabilirlik: <span id="strengthValue">1.45</span>
+        </label>
+        <input type="range" id="controlStrength"
+               min="0.8" max="2.0" step="0.05" value="1.45">
+        <div class="range-label">
+            <span>Sanatsal</span>
+            <span>Net</span>
         </div>
     </div>
 
-    <div class="btn-group">
-        <button onclick="generateQR()" id="genBtn" class="generate-btn">🚀 YAPAY ZEKAYI ÇALIŞTIR</button>
-        <button onclick="downloadPrintReady()" id="dlBtn" class="download-btn">📥 42x32 BASKI BOYUTUNDA İNDİR</button>
-    </div>
+    <button class="generate-btn" id="genBtn" onclick="generateQR()">
+        🚀 YAPAY ZEKAYI ÇALIŞTIR
+    </button>
+
+    <button class="download-btn" id="dlBtn" onclick="downloadPrintReady()">
+        📥 30×40 CM – 300 DPI İNDİR
+    </button>
 
     <div id="result-area">
-        <span style="color: #444;">QR kodunuz burada belirecek...</span>
+        <span style="color:#444;">QR görseli burada oluşur</span>
     </div>
 </div>
 
 <script>
-    // ✅ SENİN ÇALIŞAN RENDER ADRESİN
-    const API_URL = "https://qr-ai.onrender.com/generate-qr";
+const API_URL = "https://qr-ai.onrender.com/generate-qr";
+let currentImageUrl = "";
 
-    const strengthSlider = document.getElementById('controlStrength');
-    const strengthValue = document.getElementById('strengthValue');
-    const downloadBtn = document.getElementById('dlBtn');
-    let currentImageUrl = ""; 
+controlStrength.addEventListener("input", e => {
+    strengthValue.textContent = e.target.value;
+});
 
-    strengthSlider.addEventListener('input', (e) => {
-        strengthValue.textContent = e.target.value;
-    });
+async function generateQR() {
+    const url = urlInput.value;
+    const prompt = promptInput.value;
+    const negative = negativeInput.value;
+    const strength = parseFloat(controlStrength.value);
 
-    async function generateQR() {
-        const url = document.getElementById('urlInput').value;
-        const prompt = document.getElementById('promptInput').value;
-        const strength = parseFloat(strengthSlider.value);
-        
-        const btn = document.getElementById('genBtn');
-        const resultArea = document.getElementById('result-area');
+    genBtn.disabled = true;
+    result-area.innerHTML = '<div class="loading">Üretiliyor…</div>';
+    dlBtn.style.display = "none";
 
-        downloadBtn.style.display = "none";
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ url, prompt, negative, strength })
+        });
 
-        if(!url || !prompt) {
-            alert("Lütfen Link ve Prompt alanlarını doldurun!");
-            return;
-        }
+        const data = await res.json();
+        if (!data.image_url) throw new Error("Görsel üretilemedi");
 
-        btn.disabled = true;
-        btn.innerHTML = "⏳ Yapay zeka boyuyor...";
-        resultArea.innerHTML = '<div class="loading">Sihir yapılıyor... (Yaklaşık 20sn)</div>';
+        currentImageUrl = data.image_url;
+        document.getElementById("result-area").innerHTML =
+            `<img src="${data.image_url}">`;
+        dlBtn.style.display = "block";
 
-        try {
-            const response = await fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    url: url, 
-                    prompt: prompt,
-                    strength: strength
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({})); 
-                throw new Error(errorData.error || "Sunucu hatası: " + response.status);
-            }
-
-            const data = await response.json();
-            
-            if (data.image_url) {
-                // Ekranda normal göster (Bozuk görünmesin diye)
-                resultArea.innerHTML = `<img src="${data.image_url}" alt="AI QR Code" id="finalImage">`;
-                currentImageUrl = data.image_url;
-                downloadBtn.style.display = "block"; 
-            } else {
-                throw new Error("Resim oluşturulamadı.");
-            }
-
-        } catch (error) {
-            console.error(error);
-            resultArea.innerHTML = `<div style="color: #ff4444; padding:10px;">❌ Hata: ${error.message}</div>`;
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = "🚀 YAPAY ZEKAYI ÇALIŞTIR";
-        }
+    } catch (e) {
+        document.getElementById("result-area").innerHTML =
+            `<div style="color:#ff5555">${e.message}</div>`;
+    } finally {
+        genBtn.disabled = false;
     }
+}
 
-    // 🔥 ÖZEL EBATLAMA VE İNDİRME FONKSİYONU 🔥
-    async function downloadPrintReady() {
-        if (!currentImageUrl) return;
-        
-        const dlBtn = document.getElementById('dlBtn');
-        const oldText = dlBtn.innerHTML;
-        dlBtn.innerHTML = "⏳ 42x32 EBATLANIYOR...";
-        
-        try {
-            // 1. Resmi Yükle (CORS izniyle)
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            img.src = currentImageUrl;
-            await new Promise(r => img.onload = r);
+async function downloadPrintReady() {
+    if (!currentImageUrl) return;
 
-            // 2. Tuval Ayarları (Yüksek Çözünürlük)
-            // Oranlar: Sayfa=42x32, Resim=40x30
-            // Kalite için 1 birim = 50 piksel alalım.
-            const scale = 50; 
-            const canvas = document.createElement('canvas');
-            
-            const totalWidth = 42 * scale; // 2100px (42 birim)
-            const totalHeight = 32 * scale; // 1600px (32 birim)
-            
-            const imageWidth = 40 * scale; // 2000px (40 birim)
-            const imageHeight = 30 * scale; // 1500px (30 birim)
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = currentImageUrl;
+    await new Promise(r => img.onload = r);
 
-            // Kenar Boşluklarını Hesapla (Ortalamak için)
-            const marginLeft = (totalWidth - imageWidth) / 2;
-            const marginTop = (totalHeight - imageHeight) / 2;
+    // 30x40 cm @ 300 DPI
+    const width = 3543;
+    const height = 4724;
 
-            canvas.width = totalWidth;
-            canvas.height = totalHeight;
-            const ctx = canvas.getContext('2d');
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
 
-            // 3. Arka Planı BEYAZ Yap (Sayfa Rengi)
-            ctx.fillStyle = "#FFFFFF";
-            ctx.fillRect(0, 0, totalWidth, totalHeight);
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, width, height);
 
-            // 4. Resmi Belirlenen Alana Çiz (Sündürerek)
-            // Bu işlem resmi 40x30 oranına zorlar.
-            ctx.drawImage(img, marginLeft, marginTop, imageWidth, imageHeight);
-
-            // 5. İndir
-            const link = document.createElement('a');
-            link.download = `DARPHANE-BASKI-${Date.now()}.jpg`;
-            link.href = canvas.toDataURL("image/jpeg", 0.95); // En yüksek kalite JPEG
-            link.click();
-
-            dlBtn.innerHTML = "✅ İNDİ (GALERİYE BAK)";
-            setTimeout(() => dlBtn.innerHTML = oldText, 3000);
-
-        } catch (e) {
-            console.error(e);
-            alert("Resim işlenirken hata oluştu: " + e.message);
-            dlBtn.innerHTML = "❌ HATA";
-        }
-    }
+    const a = document.createElement("a");
+    a.download = `QR-30x40-300DPI-${Date.now()}.jpg`;
+    a.href = canvas.toDataURL("image/jpeg", 0.95);
+    a.click();
+}
 </script>
 
 </body>
