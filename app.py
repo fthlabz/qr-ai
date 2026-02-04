@@ -9,7 +9,7 @@ CORS(app)
 
 @app.route('/')
 def home():
-    return "MOTOR CALISIYOR! (V4.0 Final) 🚀"
+    return "MOTOR CALISIYOR! (V5.0 Core Prompt Edition) 🚀"
 
 @app.route('/generate-qr', methods=['POST'])
 def generate_qr():
@@ -24,17 +24,32 @@ def generate_qr():
         # 2. Gelen verileri al
         user_prompt = data.get('prompt', 'teddy bear')
         url = data.get('url', 'https://google.com')
-        strength = float(data.get('strength', 1.45))
+        # Varsayılan gücü 1.85 yaptik ki QR garanti okunsun
+        strength = float(data.get('strength', 1.85))
 
-        # 3. OTOMATIK GUZELLESTIRME (Magic Prompt) ✨
-        # Kullanici ne yazarsa yazsin, arkasina bunu ekliyoruz
-        magic_suffix = ", masterpiece, best quality, 8k, ultra detailed, cinematic lighting, vibrant colors, sharp focus"
-        final_prompt = user_prompt + magic_suffix
+        # ---------------------------------------------------------
+        # 3. AKILLI CORE PROMPT SISTEMI (Smart Logic) 🧠
+        # ---------------------------------------------------------
         
-        # 4. NEGATIF PROMPT (Kotu seyleri engelle) 🛡️
-        neg_prompt = "text, watermark, blur, low quality, ugly, deformed, grainy, broken QR code, distorted, low resolution"
+        # SENARYO 1: Kullanıcı uzun ve detaylı bir İngilizce prompt girmiştir (Pro Mod)
+        if len(user_prompt) > 70:
+             # Sadece ufak kalite eklemeleri yap, kullanıcının cümlesini bozma
+             final_prompt = user_prompt + ", 8k, best quality, masterpiece, sharp focus"
+             print(f"MOD: PRO (Kullanici promptu kullanildi)")
+             
+        # SENARYO 2: Kullanıcı sadece "Hamburger" veya "Samurai" yazmıştır (Otomatik Mod)
+        else:
+             # MASTER PROMPT DEVREYE GIRER: "Koyu yerleri siyah, açık yerleri beyaz yap" emri verilir.
+             final_prompt = f"A high-quality, cinematic, sharp focus image of {user_prompt}. The QR code pattern is seamlessly integrated into the texture of the subject. The DARK ELEMENTS of the subject form the black data points, and the LIGHT ELEMENTS form the white background. No separate stickers, no frames. High contrast, 8k resolution, highly detailed, photorealistic masterpiece, dramatic lighting."
+             print(f"MOD: OTO (Master Prompt devreye girdi): {user_prompt}")
 
-        print(f"Islem basladi: {final_prompt}")
+        # ---------------------------------------------------------
+
+        # 4. NEGATIF PROMPT (Guclendirilmis Koruma) 🛡️
+        # 'Broken QR code' ve 'plastic look' eklendi.
+        neg_prompt = "text, watermark, blur, low quality, ugly, deformed, grainy, broken QR code, distorted, low resolution, store shelves, price tags, people, messy background, plastic look, scan artifacts"
+
+        print(f"Islem basladi: {final_prompt[:100]}... | Guc: {strength}")
 
         # 5. Motora Gonder
         output = replicate.run(
@@ -45,7 +60,7 @@ def generate_qr():
                 "negative_prompt": neg_prompt,
                 "qr_conditioning_scale": strength,
                 "num_inference_steps": 40,
-                "guidance_scale": 9.0
+                "guidance_scale": 7.5 
             }
         )
         
