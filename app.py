@@ -41,10 +41,10 @@ def generate_qr():
             print(f"Ceviri hatasi: {e}")
 
         # STYLE PROMPT (Senin Neon Tarzın)
-        style_suffix = ", 3d render, octane render, vibrant neon colors, volumetric lighting, glowing, hyper realistic, 8k, masterpiece, sharp focus, futuristic, highly detailed"
+        style_suffix = ", 3d render, octane render, vibrant neon colors, volumetric lighting, glowing, hyper realistic, 8k, masterpiece, sharp focus, futuristic, highly detailed, masterpiece, best quality, 8k, ultra detailed, cinematic lighting, vibrant colors, sharp focus"
         final_prompt = f"{core_prompt}{style_suffix}"
         
-        neg_prompt = "ugly, disfigured, low quality, blurry, nsfw, text, watermark, grainy, distorted, broken QR code, low resolution, monochrome, washed out colors, dull, fading patterns"
+        neg_prompt = "ugly, disfigured, low quality, blurry, nsfw, text, watermark, grainy, distorted, broken QR code, low resolution, monochrome, washed out colors, dull, fading patterns, text, watermark, blur, low quality, ugly, deformed, grainy, broken QR code, distorted, low resolution"
 
         # MOTORA GÖNDER
         output = replicate.run(
