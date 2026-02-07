@@ -10,7 +10,7 @@ translator = Translator()
 
 @app.route('/')
 def home():
-    return "MOTOR HAZIR (V7.0 - Full Kontrol) 🚀"
+    return "MOTOR HAZIR (V11.0 - Prompt Mühendisliği) 🚀"
 
 @app.route('/generate-qr', methods=['POST'])
 def generate_qr():
@@ -24,12 +24,9 @@ def generate_qr():
         user_input_tr = data.get('prompt', 'mekanik robot')
         url = data.get('url', 'https://google.com')
         
-        # --- BURASI DEĞİŞTİ: Ayarları artık senden alıyoruz ---
-        # Eğer göndermezsen varsayılan olarak yine iyi değerleri kullanır.
-        strength = float(data.get('strength', 1.55))       # QR'a sadakat
-        guidance = float(data.get('guidance_scale', 9.0))  # Renk/Prompt gücü
-
-        print(f"Gelen İstek -> Prompt: {user_input_tr} | Str: {strength} | Guid: {guidance}")
+        # Ayarları panelden alıyoruz
+        strength = float(data.get('strength', 1.65))
+        guidance = float(data.get('guidance_scale', 9.0))
 
         # ÇEVİRİ
         core_prompt = user_input_tr
@@ -40,11 +37,19 @@ def generate_qr():
         except Exception as e:
             print(f"Ceviri hatasi: {e}")
 
-        # STYLE PROMPT (Senin Neon Tarzın)
-        style_suffix = ", 3d render, octane render, vibrant neon colors, volumetric lighting, glowing, hyper realistic, 8k, masterpiece, sharp focus, futuristic, highly detailed, masterpiece, best quality, 8k, ultra detailed, cinematic lighting, vibrant colors, sharp focus"
+        # --- BURASI DEĞİŞTİ: POZİTİF PROMPT MÜHENDİSLİĞİ ---
+        # Resim ne olursa olsun, onu "kareli" ve "teknolojik" yapmaya zorluyoruz.
+        # "perfect qr code texture" ve "distinct modules" kelimeleri noktaları ayırır.
+        style_suffix = ", qr code style, geometric, distinct square modules, perfect alignment, high contrast, 3d render, octane render, vibrant neon colors, 8k, highly detailed, sharp focus"
+        
         final_prompt = f"{core_prompt}{style_suffix}"
         
-        neg_prompt = "ugly, disfigured, low quality, blurry, nsfw, text, watermark, grainy, distorted, broken QR code, low resolution, monochrome, washed out colors, dull, fading patterns, text, watermark, blur, low quality, ugly, deformed, grainy, broken QR code, distorted, low resolution"
+        # --- BURASI DEĞİŞTİ: NEGATİF PROMPT MÜHENDİSLİĞİ ---
+        # "fused modules" (erimiş modüller) ve "organic covering qr" (qr'ı kapatan organik şekiller) yasaklandı.
+        # Bu sayede papağanın kanadı QR noktasının üstüne binemez.
+        neg_prompt = "ugly, blurry, low quality, nsfw, text, watermark, fused modules, melting qr code, organic shapes covering qr, distorted patterns, broken alignment, unreadable code, blurry modules, feather texture covering code, messy"
+
+        print(f"Final Prompt: {final_prompt}")
 
         # MOTORA GÖNDER
         output = replicate.run(
@@ -53,9 +58,9 @@ def generate_qr():
                 "url": url,
                 "prompt": final_prompt,
                 "negative_prompt": neg_prompt,
-                "qr_conditioning_scale": strength,  # Senin seçtiğin değer
+                "qr_conditioning_scale": strength,
                 "num_inference_steps": 50,
-                "guidance_scale": guidance,         # Senin seçtiğin değer
+                "guidance_scale": guidance,
                 "control_guidance_start": 0,
                 "control_guidance_end": 1.0
             }
