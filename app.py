@@ -28,11 +28,11 @@ def generate_qr():
 
         # 3. OTOMATIK GUZELLESTIRME (Magic Prompt) ✨
         # Kullanici ne yazarsa yazsin, arkasina bunu ekliyoruz
-        magic_suffix = ", masterpiece, best quality, 8k, ultra detailed, cinematic lighting, vibrant colors, sharp focus"
+        magic_suffix = ", masterpiece, best quality, 8k, ultra detailed, cinematic lighting, vibrant colors, sharp focus, hyper-realistic, 8k resolution, highly detailed, photorealistic, ultra-detailed, sharp focus, cinematic lighting, studio lighting, soft illumination, volumetric lighting, global illumination."
         final_prompt = user_prompt + magic_suffix
         
         # 4. NEGATIF PROMPT (Kotu seyleri engelle) 🛡️
-        neg_prompt = "text, watermark, blur, low quality, ugly, deformed, grainy, broken QR code, distorted, low resolution"
+        neg_prompt = "text, watermark, blur, low quality, ugly, deformed, grainy, broken QR code, distorted, low resolution, deformed, distorted, disfigured, blurry, low resolution, pixelated, grainy, out of focus, cross, plus sign, religious symbols, letters."
 
         print(f"Islem basladi: {final_prompt}")
 
