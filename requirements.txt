@@ -1,5 +1,5 @@
-Flask
+flask
 flask-cors
 replicate
 gunicorn
-deep-translator
+googletrans==4.0.0-rc1
