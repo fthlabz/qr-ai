@@ -25,7 +25,7 @@ def create_high_density_qr(url_data):
         # Bunu 'L' yaparsan QR seyrek olur, resim çıkmaz.
         # 'H' yapınca QR yoğun olur, resim içine gömülür.
         error_correction=qrcode.constants.ERROR_CORRECT_H,
-        box_size=10,
+        box_size=25,
         border=4,
     )
     qr.add_data(url_data)
