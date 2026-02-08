@@ -69,7 +69,7 @@ def generate_qr():
                 "num_inference_steps": 50,
                 "guidance_scale": guidance,
                 "control_guidance_start": 0,
-                "control_guidance_end": 0.85
+                "control_guidance_end": 0.75
             }
         )
         
