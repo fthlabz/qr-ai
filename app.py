@@ -20,7 +20,7 @@ def home():
 def create_high_density_qr(url_data):
     # İşte senin istediğin "H" ve "L" ayarının yapıldığı yer burası!
     qr = qrcode.QRCode(
-        version=None,  # Otomatik yoğunluk (Data sığsın diye)
+        version=10,  # Otomatik yoğunluk (Data sığsın diye)
         # 🔥 KRİTİK AYAR: ERROR_CORRECT_H (%30 Hata Payı) 🔥
         # Bunu 'L' yaparsan QR seyrek olur, resim çıkmaz.
         # 'H' yapınca QR yoğun olur, resim içine gömülür.
