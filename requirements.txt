@@ -3,5 +3,3 @@ flask-cors
 replicate
 gunicorn
 googletrans==4.0.0-rc1
-qrcode[pil]
-Pillow
