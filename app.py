@@ -14,27 +14,19 @@ translator = Translator()
 
 @app.route('/')
 def home():
-    return "MOTOR HAZIR (V21.0 - QR DARPHANE MODU / HIGH QUALITY) 🚀"
+    return "MOTOR HAZIR (V22.0 - CLEAN & WHITE MODE) 🚀"
 
-# --- ÖZEL FONKSİYON: HIGH LEVEL QR ÜRETİCİ ---
+# --- QR ÜRETİCİ ---
 def create_high_density_qr(url_data):
-    # İşte senin istediğin "H" ve "L" ayarının yapıldığı yer burası!
     qr = qrcode.QRCode(
-        version=10,  # Otomatik yoğunluk (Data sığsın diye)
-        # 🔥 KRİTİK AYAR: ERROR_CORRECT_H (%30 Hata Payı) 🔥
-        # Bunu 'L' yaparsan QR seyrek olur, resim çıkmaz.
-        # 'H' yapınca QR yoğun olur, resim içine gömülür.
+        version=10,
         error_correction=qrcode.constants.ERROR_CORRECT_H,
         box_size=25,
         border=4,
     )
     qr.add_data(url_data)
     qr.make(fit=True)
-
-    # Siyah beyaz QR resmini oluştur
     img = qr.make_image(fill_color="black", back_color="white")
-    
-    # Replicate'e göndermek için Base64 formatına çevir
     buffered = BytesIO()
     img.save(buffered, format="PNG")
     return "data:image/png;base64," + base64.b64encode(buffered.getvalue()).decode('utf-8')
@@ -51,16 +43,12 @@ def generate_qr():
         user_input_tr = data.get('prompt', 'cyberpunk city')
         url = data.get('url', 'https://google.com')
         
-        # HTML'den gelen ayarlar
-        strength = float(data.get('strength', 1.15)) 
-        guidance = float(data.get('guidance_scale', 9.0))
+        # AYARLAR: Varsayılan değerleri düşürdüm (Neon etkisini kırmak için)
+        # Guidance 7.5 idealdir. 10 üstü resmi yakar (neon yapar).
+        strength = float(data.get('strength', 1.0))  # 1.9 çok yüksek, 1.0-1.1 ideal
+        guidance = float(data.get('guidance_scale', 7.5)) # 9.0 -> 7.5'e çektik
 
-        print(f"İstek: '{user_input_tr}' | Str: {strength}")
-
-        # 1. ADIM: ÖNCE BİZİM 'H' KALİTE QR KODUMUZU OLUŞTUR
-        # Replicate'e url stringi değil, bu resmi göndereceğiz.
-        qr_image_base64 = create_high_density_qr(url)
-        print("✅ High-Density QR Kod yerelde oluşturuldu.")
+        print(f"İstek: '{user_input_tr}' | Str: {strength} | Guid: {guidance}")
 
         # ÇEVİRİ
         core_prompt = user_input_tr
@@ -71,45 +59,40 @@ def generate_qr():
         except Exception as e:
             print(f"Çeviri hatası: {e}")
 
-        # PROMPT (Mozaik/Füzyon Etkisi İçin)
+        # --- DÜZELTİLEN KISIM BURASI ---
+        # "Vibrant colors", "mosaic", "illusion" kelimelerini kaldırdım.
+        # Yerine beyaz arka planı zorlayan kelimeler ekledim.
         final_prompt = (
             f"{core_prompt}, "
-            "seamlessly integrated into qr code, "
-            "vibrant colors, highly detailed, masterpiece, "
-            "mosaic style textures, optical illusion, 8k resolution, "
-            "no borders, frameless art"
+            "isolated on white background, "  # Beyaz arka planda izole et
+            "clean background, "              # Temiz arka plan
+            "minimalist, high quality, "      # Minimalist
+            "highly detailed, 8k resolution, "
+            "soft lighting"                   # Yumuşak ışık (Neon karşıtı)
         )
 
+        # Negatif prompt'a "neon" ve "karmaşa" ekledik
         neg_prompt = (
-            "border, frame, margin, padding, ugly, blurry, low quality, "
-            "distorted, broken qr code, unreadable, text, watermark, "
-            "obvious black squares, simple barcode"
+            "neon, saturated, vibrant, chaotic, " # Neon ve doygun renkleri engelle
+            "complex background, patterns, textures, " # Arka plan desenlerini engelle
+            "border, frame, margin, ugly, blurry, low quality, "
+            "distorted, broken qr code, unreadable"
         )
 
-        # MOTORA GÖNDER
-        # Not: zylim0702 modeli bazen 'image' parametresini destekler, bazen sadece url.
-        # Eğer bu model hata verirse, 'lucataco/qr-code-controlnet' modeline geçeceğiz.
-        # Ama şimdilik senin modelinde deniyoruz.
         output = replicate.run(
             "zylim0702/qr_code_controlnet:628e604e13cf63d8ec58bd4d238474e8986b054bc5e1326e50995fdbc851c557",
             input={
-                "url": url, # Yedek olarak dursun
+                "url": url,
                 "prompt": final_prompt,
                 "negative_prompt": neg_prompt,
                 "qr_conditioning_scale": strength,
                 "num_inference_steps": 50,
                 "guidance_scale": guidance,
                 "control_guidance_start": 0.0,
-                "control_guidance_end": 0.75,
-                # 🔥 BİZİM ÜRETTİĞİMİZ YOĞUN QR KODU BURAYA GİRİYOR 🔥
-                # Model bunu "kontrol resmi" olarak kullanacak.
-                "qr_code_content": url # Bazı versiyonlar image almaz, content'i yoğunlaştıramayız ama şansımızı deneriz.
+                "control_guidance_end": 0.8, # Resmi biraz daha serbest bıraktık
+                "qr_code_content": url
             }
         )
-        
-        # NOT: Eğer üstteki kod o "yoğunluğu" vermezse, model "image" parametresi istiyor demektir.
-        # Replicate'deki bu model versiyonu bazen dışarıdan resim kabul etmez.
-        # Eğer çalışmazsa "nateraw/qr-code-controlnet" modelini kullanacağız.
         
         return jsonify({"image_url": str(output[0])})
 
