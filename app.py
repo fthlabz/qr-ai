@@ -14,9 +14,8 @@ translator = Translator()
 
 @app.route('/')
 def home():
-    return "MOTOR HAZIR (V22.0 - CLEAN & WHITE MODE) 🚀"
+    return "MOTOR HAZIR (V23.0 - USER CONTROL MODE) 🚀"
 
-# --- QR ÜRETİCİ ---
 def create_high_density_qr(url_data):
     qr = qrcode.QRCode(
         version=10,
@@ -43,12 +42,12 @@ def generate_qr():
         user_input_tr = data.get('prompt', 'cyberpunk city')
         url = data.get('url', 'https://google.com')
         
-        # AYARLAR: Varsayılan değerleri düşürdüm (Neon etkisini kırmak için)
-        # Guidance 7.5 idealdir. 10 üstü resmi yakar (neon yapar).
-        strength = float(data.get('strength', 1.0))  # 1.9 çok yüksek, 1.0-1.1 ideal
-        guidance = float(data.get('guidance_scale', 7.5)) # 9.0 -> 7.5'e çektik
+        # --- BURASI DÜZELDİ: SENİN GÖNDERDİĞİN AYARLARI AYNEN KULLANIYORUZ ---
+        # Frontend ne yollarsa onu alır. Varsayılanlar sadece veri gelmezse devreye girer.
+        strength = float(data.get('strength', 1.15)) 
+        guidance = float(data.get('guidance_scale', 9.0))
 
-        print(f"İstek: '{user_input_tr}' | Str: {strength} | Guid: {guidance}")
+        print(f"Kullanıcı Ayarları -> Prompt: '{user_input_tr}' | Str: {strength} | Guid: {guidance}")
 
         # ÇEVİRİ
         core_prompt = user_input_tr
@@ -59,21 +58,19 @@ def generate_qr():
         except Exception as e:
             print(f"Çeviri hatası: {e}")
 
-        # --- DÜZELTİLEN KISIM BURASI ---
-        # "Vibrant colors", "mosaic", "illusion" kelimelerini kaldırdım.
-        # Yerine beyaz arka planı zorlayan kelimeler ekledim.
+        # --- SADECE BURAYI DEĞİŞTİRDİM ---
+        # Neon ve karmaşa yaratan kelimeleri sildim.
+        # Yerine "beyaz arka plan" zorlayıcılarını ekledim.
         final_prompt = (
             f"{core_prompt}, "
-            "isolated on white background, "  # Beyaz arka planda izole et
-            "clean background, "              # Temiz arka plan
-            "minimalist, high quality, "      # Minimalist
-            "highly detailed, 8k resolution, "
-            "soft lighting"                   # Yumuşak ışık (Neon karşıtı)
+            "isolated on white background, "  # Beyazda izole et
+            "clean background, "              # Temiz zemin
+            "high quality, 8k resolution"     # Sadece kalite komutları
         )
 
-        # Negatif prompt'a "neon" ve "karmaşa" ekledik
+        # Negatif Prompt: Neon ve karmaşayı engellemek için
         neg_prompt = (
-            "neon, saturated, vibrant, chaotic, " # Neon ve doygun renkleri engelle
+            "neon, saturated, vibrant, chaotic, " # Neon renkleri engelle
             "complex background, patterns, textures, " # Arka plan desenlerini engelle
             "border, frame, margin, ugly, blurry, low quality, "
             "distorted, broken qr code, unreadable"
@@ -85,11 +82,11 @@ def generate_qr():
                 "url": url,
                 "prompt": final_prompt,
                 "negative_prompt": neg_prompt,
-                "qr_conditioning_scale": strength,
+                "qr_conditioning_scale": strength, # Senin slider değerin
                 "num_inference_steps": 50,
-                "guidance_scale": guidance,
+                "guidance_scale": guidance,        # Senin slider değerin
                 "control_guidance_start": 0.0,
-                "control_guidance_end": 0.8, # Resmi biraz daha serbest bıraktık
+                "control_guidance_end": 0.8,
                 "qr_code_content": url
             }
         )
